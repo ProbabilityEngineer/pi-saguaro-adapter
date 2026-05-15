@@ -20,15 +20,13 @@ npm run build
 
 ## Load in Pi
 
-```bash
-pi --extension pi-saguaro-adapter
-```
-
-Or point Pi at the built file:
+Install it with Pi:
 
 ```bash
-pi --extension /absolute/path/to/pi-saguaro-adapter/dist/index.js
+pi install https://github.com/ProbabilityEngineer/pi-saguaro-adapter
 ```
+
+Then enable it in `pi config` if needed.
 
 ## Notes
 

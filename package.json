@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "Thin Pi extension that runs Saguaro reviews at turn end.",
   "type": "module",
-  "main": "dist/index.js",
-  "exports": "./dist/index.js",
+  "main": "index.ts",
+  "exports": "./index.ts",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": ["index.ts", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/ProbabilityEngineer/pi-saguaro-adapter#readme",
   "pi": {
-    "extensions": ["./dist/index.js"]
+    "extensions": ["./index.ts"]
   }
 }
