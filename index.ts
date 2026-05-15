@@ -84,13 +84,21 @@ export default function (pi: ExtensionAPI) {
 		);
 	});
 
+	// Smoke-test diff: this lets turn_end have something to detect.
 	pi.on("turn_end", async (_event: any, ctx: any) => {
 		if (!state.repoRoot || !state.sagAvailable) return;
+		if (ctx.hasUI) ctx.ui.notify("Saguaro turn_end check…", "info");
 		const rev = await gitHead(pi, state.repoRoot);
-		if (!rev || rev === state.lastReviewedRev) return;
+		if (!rev || rev === state.lastReviewedRev) {
+			if (ctx.hasUI) ctx.ui.notify("Saguaro skipped: no new HEAD.", "info");
+			return;
+		}
 
 		const diff = await gitDiff(pi, state.repoRoot);
-		if (!diff.trim() || diff === state.lastReviewedDiff) return;
+		if (!diff.trim() || diff === state.lastReviewedDiff) {
+			if (ctx.hasUI) ctx.ui.notify("Saguaro skipped: no new diff.", "info");
+			return;
+		}
 
 		const review = await runSagReview(pi, state.repoRoot);
 		state.lastReviewedRev = rev;
@@ -132,37 +140,12 @@ export default function (pi: ExtensionAPI) {
 			);
 	});
 
-	pi.registerCommand("sag-init", {
-		description: "Initialize Saguaro in this repo",
-		handler: async (_args: string, ctx: any) => {
-			if (!ensureReady(ctx)) return;
-			const result = await pi.exec("sag", ["init"], {
-				cwd: state.repoRoot!,
-				timeout: 10 * 60 * 1000,
-			});
-			ctx.ui.notify(
-				result.stdout?.trim() ||
-					result.stderr?.trim() ||
-					"Saguaro initialized.",
-				result.code === 0 ? "info" : "warning",
-			);
-		},
-	});
-
 	pi.registerCommand("sag-model", {
 		description: "Switch Saguaro review model",
-		handler: async (args: string, ctx: any) => {
-			if (!ensureReady(ctx)) return;
-			const parts = splitArgs(args);
-			const result = await pi.exec("sag", ["model", ...parts], {
-				cwd: state.repoRoot!,
-				timeout: 60_000,
-			});
+		handler: async (_args: string, ctx: any) => {
 			ctx.ui.notify(
-				result.stdout?.trim() ||
-					result.stderr?.trim() ||
-					"Saguaro model updated.",
-				result.code === 0 ? "info" : "warning",
+				"/sag-model is interactive; run `sag model` in a terminal instead.",
+				"warning",
 			);
 		},
 	});
@@ -174,7 +157,14 @@ export default function (pi: ExtensionAPI) {
 			const parts = splitArgs(args);
 			if (parts.length === 0) {
 				ctx.ui.notify(
-					"Usage: /sag-rules <list|add|remove|...> [args]",
+					"Usage: /sag-rules <list|explain|validate|delete|locate|create|...> [args]",
+					"warning",
+				);
+				return;
+			}
+			if (parts[0] === "create" && !parts.includes("--skip-preview")) {
+				ctx.ui.notify(
+					"/sag-rules create can prompt for a preview; add --skip-preview or run it in a terminal.",
 					"warning",
 				);
 				return;
@@ -232,7 +222,10 @@ export default function (pi: ExtensionAPI) {
 			if (!ensureReady(ctx)) return;
 			const parts = splitArgs(args);
 			if (parts.length === 0) {
-				ctx.ui.notify("Usage: /sag-hook <enable|disable|pre-tool|run> [args]", "warning");
+				ctx.ui.notify(
+					"Usage: /sag-hook <enable|disable|pre-tool|run> [args]",
+					"warning",
+				);
 				return;
 			}
 			const result = await pi.exec("sag", ["hook", ...parts], {
@@ -244,6 +237,16 @@ export default function (pi: ExtensionAPI) {
 					result.stderr?.trim() ||
 					"Saguaro hook updated.",
 				result.code === 0 ? "info" : "warning",
+			);
+		},
+	});
+
+	pi.registerCommand("sag-status", {
+		description: "Show Saguaro adapter status",
+		handler: async (_args: string, ctx: any) => {
+			ctx.ui.notify(
+				`repo=${state.repoRoot ?? "none"}, sag=${state.sagAvailable ? "yes" : "no"}, lastRev=${state.lastReviewedRev ?? "none"}`,
+				"info",
 			);
 		},
 	});

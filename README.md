@@ -9,7 +9,7 @@ Thin Pi extension for Saguaro (`sag`). It runs reviews at turn end and avoids re
 - Session startup detection
 - One review per new git revision
 - Pre-compact and shutdown review safety checks
-- `/sag-init`, `/sag-model`, `/sag-rules`, `/sag-index`, `/sag-stats`, `/sag-hook`, `/sag-review`
+- `/sag-model` (terminal-only), `/sag-rules`, `/sag-index`, `/sag-stats`, `/sag-status`, `/sag-hook`, `/sag-review`
 
 ## Install
 
@@ -33,4 +33,5 @@ Then enable it in `pi config` if needed.
 - Saguaro must be installed as `sag`
 - Reviews are advisory by default
 - Use this adapter when you want low-noise, turn-end enforcement
-- Command wrappers pass through to the matching `sag` subcommand
+- Command wrappers pass through to the matching `sag` subcommand, except interactive ones are blocked or omitted
+- `/sag-status` reports whether the adapter sees a repo, `sag`, and last reviewed HEAD
