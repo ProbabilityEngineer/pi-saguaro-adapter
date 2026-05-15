@@ -28,11 +28,59 @@ async function gitRoot(
 	}
 }
 
+function normalizeIgnorePattern(line: string): string | undefined {
+	const trimmed = line.trim();
+	if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("!")) return;
+	const cleaned = trimmed.replace(/\/$/, "");
+	return `:(exclude)${cleaned}${cleaned.includes("*") || cleaned.includes("?") || cleaned.includes("[") ? "" : "/**"}`;
+}
+
+async function readIgnoreExcludes(
+	pi: ExtensionAPI,
+	cwd: string,
+): Promise<string[]> {
+	try {
+		const sources = await Promise.all([
+			pi.exec("cat", [".gitignore"], { cwd }),
+			pi.exec("git", ["config", "--path", "core.excludesFile"], { cwd }),
+			pi.exec("git", ["rev-parse", "--git-path", "info/exclude"], { cwd }),
+		]);
+		const paths = [
+			".gitignore",
+			...sources
+				.slice(1)
+				.map(({ stdout, code }) => (code === 0 ? stdout.trim() : ""))
+				.filter(Boolean),
+		];
+		const contents = await Promise.all(
+			paths.map(async (path) => {
+				const { stdout, code } = await pi.exec("cat", [path], { cwd });
+				return code === 0 ? stdout : "";
+			}),
+		);
+		return contents
+			.flatMap((text) => text.split(/\r?\n/))
+			.map(normalizeIgnorePattern)
+			.filter(Boolean) as string[];
+	} catch {
+		return [];
+	}
+}
+
 async function gitDiff(pi: ExtensionAPI, cwd: string): Promise<string> {
 	try {
+		const excludes = await readIgnoreExcludes(pi, cwd);
 		const { stdout } = await pi.exec(
 			"git",
-			["diff", "--no-ext-diff", "--ignore-submodules=dirty", "HEAD"],
+			[
+				"diff",
+				"--no-ext-diff",
+				"--ignore-submodules=dirty",
+				"HEAD",
+				"--",
+				".",
+				...excludes,
+			],
 			{ cwd },
 		);
 		return stdout;
@@ -97,7 +145,6 @@ export default function (pi: ExtensionAPI) {
 
 	pi.on("turn_end", async (_event: any, ctx: any) => {
 		if (!state.repoRoot || !state.sagAvailable) return;
-		if (ctx.hasUI) ctx.ui.notify("Saguaro turn_end check…", "info");
 
 		const diff = await gitDiff(pi, state.repoRoot);
 		if (!diff.trim() || diff === state.lastReviewedDiff) return;
@@ -129,6 +176,7 @@ export default function (pi: ExtensionAPI) {
 		const diff = await gitDiff(pi, state.repoRoot);
 		if (!diff.trim() || diff === state.lastReviewedDiff) return;
 		const review = await runSagReview(pi, state.repoRoot);
+		state.lastReviewedDiff = diff;
 		if (ctx.hasUI)
 			ctx.ui.notify(
 				review.output || "Saguaro shutdown review complete.",
