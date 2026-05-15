@@ -89,10 +89,7 @@ export default function (pi: ExtensionAPI) {
 		if (ctx.hasUI) ctx.ui.notify("Saguaro turn_end check…", "info");
 
 		const diff = await gitDiff(pi, state.repoRoot);
-		if (!diff.trim() || diff === state.lastReviewedDiff) {
-			if (ctx.hasUI) ctx.ui.notify("Saguaro skipped: no new diff.", "info");
-			return;
-		}
+		if (!diff.trim() || diff === state.lastReviewedDiff) return;
 
 		const review = await runSagReview(pi, state.repoRoot);
 		state.lastReviewedDiff = diff;

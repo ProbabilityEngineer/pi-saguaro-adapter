@@ -34,4 +34,4 @@ Then enable it in `pi config` if needed.
 - Reviews are advisory by default
 - Use this adapter when you want low-noise, turn-end enforcement
 - Command wrappers pass through to the matching `sag` subcommand, except interactive ones are blocked or omitted
-- `/sag-status` reports whether the adapter sees a repo, `sag`, and last reviewed HEAD
+- `/sag-status` reports whether the adapter sees a repo, `sag`, and last reviewed diff
