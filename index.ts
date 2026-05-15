@@ -59,6 +59,22 @@ export default function (pi: ExtensionAPI) {
 		lastReviewedDiff: undefined as string | undefined,
 	};
 
+	function ensureReady(ctx: any): boolean {
+		if (!state.repoRoot) {
+			ctx.ui.notify("Not in a git repo.", "warning");
+			return false;
+		}
+		if (!state.sagAvailable) {
+			ctx.ui.notify("sag is not installed.", "error");
+			return false;
+		}
+		return true;
+	}
+
+	function splitArgs(args: string): string[] {
+		return args.trim() ? args.trim().split(/\s+/) : [];
+	}
+
 	pi.on("session_start", async (_event: any, ctx: any) => {
 		state.repoRoot = await gitRoot(pi, ctx.cwd);
 		state.sagAvailable = await hasCommand(pi, "sag");
@@ -116,18 +132,63 @@ export default function (pi: ExtensionAPI) {
 			);
 	});
 
+	pi.registerCommand("sag-init", {
+		description: "Initialize Saguaro in this repo",
+		handler: async (_args: string, ctx: any) => {
+			if (!ensureReady(ctx)) return;
+			const result = await pi.exec("sag", ["init"], { cwd: state.repoRoot!, timeout: 10 * 60 * 1000 });
+			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro initialized.", result.code === 0 ? "info" : "warning");
+		},
+	});
+
+	pi.registerCommand("sag-model", {
+		description: "Switch Saguaro review model",
+		handler: async (args: string, ctx: any) => {
+			if (!ensureReady(ctx)) return;
+			const parts = splitArgs(args);
+			const result = await pi.exec("sag", ["model", ...parts], { cwd: state.repoRoot!, timeout: 60_000 });
+			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro model updated.", result.code === 0 ? "info" : "warning");
+		},
+	});
+
+	pi.registerCommand("sag-rules", {
+		description: "Manage Saguaro rules",
+		handler: async (args: string, ctx: any) => {
+			if (!ensureReady(ctx)) return;
+			const parts = splitArgs(args);
+			if (parts.length === 0) {
+				ctx.ui.notify("Usage: /sag-rules <list|add|remove|...> [args]", "warning");
+				return;
+			}
+			const result = await pi.exec("sag", ["rules", ...parts], { cwd: state.repoRoot!, timeout: 60_000 });
+			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro rules updated.", result.code === 0 ? "info" : "warning");
+		},
+	});
+
+	pi.registerCommand("sag-index", {
+		description: "Build the Saguaro import graph",
+		handler: async (_args: string, ctx: any) => {
+			if (!ensureReady(ctx)) return;
+			const result = await pi.exec("sag", ["index"], { cwd: state.repoRoot!, timeout: 10 * 60 * 1000 });
+			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro index built.", result.code === 0 ? "info" : "warning");
+		},
+	});
+
+	pi.registerCommand("sag-stats", {
+		description: "Show Saguaro usage and review stats",
+		handler: async (_args: string, ctx: any) => {
+			if (!ensureReady(ctx)) return;
+			const result = await pi.exec("sag", ["stats"], { cwd: state.repoRoot!, timeout: 60_000 });
+			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro stats shown.", result.code === 0 ? "info" : "warning");
+		},
+	});
+
 	pi.registerCommand("sag-review", {
 		description: "Run a Saguaro review for the current repo",
 		handler: async (_args: string, ctx: any) => {
-			if (!state.repoRoot)
-				return ctx.ui.notify("Not in a git repo.", "warning");
-			if (!state.sagAvailable)
-				return ctx.ui.notify("sag is not installed.", "error");
-			const review = await runSagReview(pi, state.repoRoot);
-			ctx.ui.notify(
-				review.output || "Saguaro review clean.",
-				review.code === 0 ? "info" : "warning",
-			);
+			if (!ensureReady(ctx)) return;
+			const review = await runSagReview(pi, state.repoRoot!);
+			ctx.ui.notify(review.output || "Saguaro review clean.", review.code === 0 ? "info" : "warning");
 		},
 	});
 }
