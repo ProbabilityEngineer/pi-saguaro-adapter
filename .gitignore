@@ -3,5 +3,4 @@ node_modules/
 .pi-lens/
 .saguaro/
 !.saguaro/config.yaml
-!.saguaro/history/
 .mcp.json
