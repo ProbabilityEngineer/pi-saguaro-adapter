@@ -84,15 +84,9 @@ export default function (pi: ExtensionAPI) {
 		);
 	});
 
-	// Smoke-test diff: this lets turn_end have something to detect.
 	pi.on("turn_end", async (_event: any, ctx: any) => {
 		if (!state.repoRoot || !state.sagAvailable) return;
 		if (ctx.hasUI) ctx.ui.notify("Saguaro turn_end check…", "info");
-		const rev = await gitHead(pi, state.repoRoot);
-		if (!rev || rev === state.lastReviewedRev) {
-			if (ctx.hasUI) ctx.ui.notify("Saguaro skipped: no new HEAD.", "info");
-			return;
-		}
 
 		const diff = await gitDiff(pi, state.repoRoot);
 		if (!diff.trim() || diff === state.lastReviewedDiff) {
@@ -101,7 +95,6 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		const review = await runSagReview(pi, state.repoRoot);
-		state.lastReviewedRev = rev;
 		state.lastReviewedDiff = diff;
 		if (ctx.hasUI)
 			ctx.ui.notify(
@@ -112,12 +105,9 @@ export default function (pi: ExtensionAPI) {
 
 	pi.on("session_before_compact", async (_event: any, ctx: any) => {
 		if (!state.repoRoot || !state.sagAvailable) return;
-		const rev = await gitHead(pi, state.repoRoot);
-		if (!rev || rev === state.lastReviewedRev) return;
 		const diff = await gitDiff(pi, state.repoRoot);
 		if (!diff.trim() || diff === state.lastReviewedDiff) return;
 		const review = await runSagReview(pi, state.repoRoot);
-		state.lastReviewedRev = rev;
 		state.lastReviewedDiff = diff;
 		if (ctx.hasUI)
 			ctx.ui.notify(
@@ -128,8 +118,6 @@ export default function (pi: ExtensionAPI) {
 
 	pi.on("session_shutdown", async (_event: any, ctx: any) => {
 		if (!state.repoRoot || !state.sagAvailable) return;
-		const rev = await gitHead(pi, state.repoRoot);
-		if (!rev || rev === state.lastReviewedRev) return;
 		const diff = await gitDiff(pi, state.repoRoot);
 		if (!diff.trim() || diff === state.lastReviewedDiff) return;
 		const review = await runSagReview(pi, state.repoRoot);
