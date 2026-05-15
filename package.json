@@ -19,10 +19,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourname/pi-saguaro-adapter.git"
+    "url": "https://github.com/ProbabilityEngineer/pi-saguaro-adapter.git"
   },
   "bugs": {
-    "url": "https://github.com/yourname/pi-saguaro-adapter/issues"
+    "url": "https://github.com/ProbabilityEngineer/pi-saguaro-adapter/issues"
   },
-  "homepage": "https://github.com/yourname/pi-saguaro-adapter#readme"
+  "homepage": "https://github.com/ProbabilityEngineer/pi-saguaro-adapter#readme"
 }

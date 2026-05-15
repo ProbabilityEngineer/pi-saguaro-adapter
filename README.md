@@ -1,5 +1,7 @@
 # pi-saguaro-adapter
 
+[![GitHub](https://img.shields.io/badge/GitHub-ProbabilityEngineer%2Fpi--saguaro--adapter-blue)](https://github.com/ProbabilityEngineer/pi-saguaro-adapter)
+
 Thin Pi extension for Saguaro (`sag`). It runs reviews at turn end and avoids redundant reviews by tracking the last reviewed git `HEAD` and diff.
 
 ## Features
