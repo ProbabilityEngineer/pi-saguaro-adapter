@@ -136,8 +136,16 @@ export default function (pi: ExtensionAPI) {
 		description: "Initialize Saguaro in this repo",
 		handler: async (_args: string, ctx: any) => {
 			if (!ensureReady(ctx)) return;
-			const result = await pi.exec("sag", ["init"], { cwd: state.repoRoot!, timeout: 10 * 60 * 1000 });
-			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro initialized.", result.code === 0 ? "info" : "warning");
+			const result = await pi.exec("sag", ["init"], {
+				cwd: state.repoRoot!,
+				timeout: 10 * 60 * 1000,
+			});
+			ctx.ui.notify(
+				result.stdout?.trim() ||
+					result.stderr?.trim() ||
+					"Saguaro initialized.",
+				result.code === 0 ? "info" : "warning",
+			);
 		},
 	});
 
@@ -146,8 +154,16 @@ export default function (pi: ExtensionAPI) {
 		handler: async (args: string, ctx: any) => {
 			if (!ensureReady(ctx)) return;
 			const parts = splitArgs(args);
-			const result = await pi.exec("sag", ["model", ...parts], { cwd: state.repoRoot!, timeout: 60_000 });
-			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro model updated.", result.code === 0 ? "info" : "warning");
+			const result = await pi.exec("sag", ["model", ...parts], {
+				cwd: state.repoRoot!,
+				timeout: 60_000,
+			});
+			ctx.ui.notify(
+				result.stdout?.trim() ||
+					result.stderr?.trim() ||
+					"Saguaro model updated.",
+				result.code === 0 ? "info" : "warning",
+			);
 		},
 	});
 
@@ -157,11 +173,22 @@ export default function (pi: ExtensionAPI) {
 			if (!ensureReady(ctx)) return;
 			const parts = splitArgs(args);
 			if (parts.length === 0) {
-				ctx.ui.notify("Usage: /sag-rules <list|add|remove|...> [args]", "warning");
+				ctx.ui.notify(
+					"Usage: /sag-rules <list|add|remove|...> [args]",
+					"warning",
+				);
 				return;
 			}
-			const result = await pi.exec("sag", ["rules", ...parts], { cwd: state.repoRoot!, timeout: 60_000 });
-			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro rules updated.", result.code === 0 ? "info" : "warning");
+			const result = await pi.exec("sag", ["rules", ...parts], {
+				cwd: state.repoRoot!,
+				timeout: 60_000,
+			});
+			ctx.ui.notify(
+				result.stdout?.trim() ||
+					result.stderr?.trim() ||
+					"Saguaro rules updated.",
+				result.code === 0 ? "info" : "warning",
+			);
 		},
 	});
 
@@ -169,8 +196,16 @@ export default function (pi: ExtensionAPI) {
 		description: "Build the Saguaro import graph",
 		handler: async (_args: string, ctx: any) => {
 			if (!ensureReady(ctx)) return;
-			const result = await pi.exec("sag", ["index"], { cwd: state.repoRoot!, timeout: 10 * 60 * 1000 });
-			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro index built.", result.code === 0 ? "info" : "warning");
+			const result = await pi.exec("sag", ["index"], {
+				cwd: state.repoRoot!,
+				timeout: 10 * 60 * 1000,
+			});
+			ctx.ui.notify(
+				result.stdout?.trim() ||
+					result.stderr?.trim() ||
+					"Saguaro index built.",
+				result.code === 0 ? "info" : "warning",
+			);
 		},
 	});
 
@@ -178,8 +213,38 @@ export default function (pi: ExtensionAPI) {
 		description: "Show Saguaro usage and review stats",
 		handler: async (_args: string, ctx: any) => {
 			if (!ensureReady(ctx)) return;
-			const result = await pi.exec("sag", ["stats"], { cwd: state.repoRoot!, timeout: 60_000 });
-			ctx.ui.notify(result.stdout?.trim() || result.stderr?.trim() || "Saguaro stats shown.", result.code === 0 ? "info" : "warning");
+			const result = await pi.exec("sag", ["stats"], {
+				cwd: state.repoRoot!,
+				timeout: 60_000,
+			});
+			ctx.ui.notify(
+				result.stdout?.trim() ||
+					result.stderr?.trim() ||
+					"Saguaro stats shown.",
+				result.code === 0 ? "info" : "warning",
+			);
+		},
+	});
+
+	pi.registerCommand("sag-hook", {
+		description: "Manage Saguaro agent hooks",
+		handler: async (args: string, ctx: any) => {
+			if (!ensureReady(ctx)) return;
+			const parts = splitArgs(args);
+			if (parts.length === 0) {
+				ctx.ui.notify("Usage: /sag-hook <enable|disable|pre-tool|run> [args]", "warning");
+				return;
+			}
+			const result = await pi.exec("sag", ["hook", ...parts], {
+				cwd: state.repoRoot!,
+				timeout: 60_000,
+			});
+			ctx.ui.notify(
+				result.stdout?.trim() ||
+					result.stderr?.trim() ||
+					"Saguaro hook updated.",
+				result.code === 0 ? "info" : "warning",
+			);
 		},
 	});
 
@@ -188,7 +253,10 @@ export default function (pi: ExtensionAPI) {
 		handler: async (_args: string, ctx: any) => {
 			if (!ensureReady(ctx)) return;
 			const review = await runSagReview(pi, state.repoRoot!);
-			ctx.ui.notify(review.output || "Saguaro review clean.", review.code === 0 ? "info" : "warning");
+			ctx.ui.notify(
+				review.output || "Saguaro review clean.",
+				review.code === 0 ? "info" : "warning",
+			);
 		},
 	});
 }
