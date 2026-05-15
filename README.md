@@ -2,12 +2,12 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-ProbabilityEngineer%2Fpi--saguaro--adapter-blue)](https://github.com/ProbabilityEngineer/pi-saguaro-adapter)
 
-Thin Pi extension for Saguaro (`sag`). It runs reviews at turn end and avoids redundant reviews by tracking the last reviewed git `HEAD` and diff.
+Thin Pi extension for Saguaro (`sag`). It runs reviews at turn end and avoids redundant reviews by tracking the last reviewed diff.
 
 ## Features
 
 - Session startup detection
-- One review per new git revision
+- One review per new working diff
 - Pre-compact and shutdown review safety checks
 - `/sag-model` (terminal-only), `/sag-rules`, `/sag-index`, `/sag-stats`, `/sag-status`, `/sag-hook`, `/sag-review`
 

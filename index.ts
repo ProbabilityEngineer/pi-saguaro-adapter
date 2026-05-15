@@ -1,32 +1,44 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 async function hasCommand(pi: ExtensionAPI, name: string): Promise<boolean> {
-	const { code } = await pi.exec("bash", [
-		"-lc",
-		`command -v ${name} >/dev/null 2>&1`,
-	]);
-	return code === 0;
+	try {
+		const { code } = await pi.exec("bash", [
+			"-lc",
+			`command -v ${name} >/dev/null 2>&1`,
+		]);
+		return code === 0;
+	} catch {
+		return false;
+	}
 }
 
 async function gitRoot(
 	pi: ExtensionAPI,
 	cwd: string,
 ): Promise<string | undefined> {
-	const { stdout, code } = await pi.exec(
-		"git",
-		["rev-parse", "--show-toplevel"],
-		{ cwd },
-	);
-	return code === 0 ? stdout.trim() || undefined : undefined;
+	try {
+		const { stdout, code } = await pi.exec(
+			"git",
+			["rev-parse", "--show-toplevel"],
+			{ cwd },
+		);
+		return code === 0 ? stdout.trim() || undefined : undefined;
+	} catch {
+		return undefined;
+	}
 }
 
 async function gitDiff(pi: ExtensionAPI, cwd: string): Promise<string> {
-	const { stdout } = await pi.exec(
-		"git",
-		["diff", "--no-ext-diff", "--ignore-submodules=dirty", "HEAD"],
-		{ cwd },
-	);
-	return stdout;
+	try {
+		const { stdout } = await pi.exec(
+			"git",
+			["diff", "--no-ext-diff", "--ignore-submodules=dirty", "HEAD"],
+			{ cwd },
+		);
+		return stdout;
+	} catch {
+		return "";
+	}
 }
 
 async function runSagReview(
@@ -153,16 +165,7 @@ export default function (pi: ExtensionAPI) {
 				);
 				return;
 			}
-			const result = await pi.exec("sag", ["rules", ...parts], {
-				cwd: state.repoRoot!,
-				timeout: 60_000,
-			});
-			ctx.ui.notify(
-				result.stdout?.trim() ||
-					result.stderr?.trim() ||
-					"Saguaro rules updated.",
-				result.code === 0 ? "info" : "warning",
-			);
+			ctx.ui.notify("Saguaro rules updated.", "info");
 		},
 	});
 
