@@ -1,0 +1,28 @@
+{
+  "name": "pi-saguaro-adapter",
+  "version": "0.1.0",
+  "description": "Thin Pi extension that runs Saguaro reviews at turn end.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.53.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "keywords": ["pi", "pi-extension", "saguaro", "review"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourname/pi-saguaro-adapter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourname/pi-saguaro-adapter/issues"
+  },
+  "homepage": "https://github.com/yourname/pi-saguaro-adapter#readme"
+}
