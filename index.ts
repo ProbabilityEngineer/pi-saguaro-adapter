@@ -20,14 +20,6 @@ async function gitRoot(
 	return code === 0 ? stdout.trim() || undefined : undefined;
 }
 
-async function gitHead(
-	pi: ExtensionAPI,
-	cwd: string,
-): Promise<string | undefined> {
-	const { stdout, code } = await pi.exec("git", ["rev-parse", "HEAD"], { cwd });
-	return code === 0 ? stdout.trim() || undefined : undefined;
-}
-
 async function gitDiff(pi: ExtensionAPI, cwd: string): Promise<string> {
 	const { stdout } = await pi.exec(
 		"git",
@@ -41,14 +33,21 @@ async function runSagReview(
 	pi: ExtensionAPI,
 	cwd: string,
 ): Promise<{ output: string; code: number }> {
-	const { stdout, stderr, code } = await pi.exec("sag", ["review"], {
-		cwd,
-		timeout: 10 * 60 * 1000,
-	});
-	return {
-		output: [stdout.trim(), stderr.trim()].filter(Boolean).join("\n"),
-		code,
-	};
+	try {
+		const { stdout, stderr, code } = await pi.exec("sag", ["review"], {
+			cwd,
+			timeout: 10 * 60 * 1000,
+		});
+		return {
+			output: [stdout.trim(), stderr.trim()].filter(Boolean).join("\n"),
+			code,
+		};
+	} catch (error) {
+		return {
+			output: error instanceof Error ? error.message : String(error),
+			code: 1,
+		};
+	}
 }
 
 export default function (pi: ExtensionAPI) {
